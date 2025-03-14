@@ -17,21 +17,20 @@ void error(string word1, string word2, string msg){
 // supports replacing one letter, inserting one letter, or deleating one letter
 // --------------------------------------------------------------------------
 bool edit_distance_within(const std::string& str1, const std::string& str2, int d){
-    if (d != 1) return false; // assume that d is 1
-    if (str1 == str2) return false; // same words are not adjacent
+    if (str1 == str2) return true; // same words are not adjacent
 
     int len1 = str1.size(), len2 = str2.size();
 
-    if (abs(len1 - len2) > 1) return false;
+    if (abs(len1 - len2) > d) return false;
 
     // if lengths are equal than substitution
     if (len1 == len2){
         int diffCount = 0;
         for (int i = 0; i < len1; i++){
             if(str1[i] != str2[i]) diffCount++;
-            if (diffCount > 1) return false;
+            if (diffCount > d) return false;
         }
-        return diffCount == 1;
+        return diffCount <= d;
     } else{
         // if lengths differ by one, check for insert or delete
         const string &shorter = (len1 < len2) ? str1 : str2; // Identify shorter and longer strings
@@ -49,9 +48,9 @@ bool edit_distance_within(const std::string& str1, const std::string& str2, int 
                 if (diffCount > 1) return false;
             }
         }
-        // accoun for extra letter at the end, if any
-        if (j < longer.size()) diffCount++;
-        return diffCount == 1;    
+        // account for extra letter at the end, if any
+        diffCount += (longer.size() - j);
+        return diffCount <= d;    
     }
 }
 
@@ -93,12 +92,15 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
 
 void load_words(set<string> & word_list, const string& file_name){
     ifstream infile(file_name.c_str());
-    if (!infile)
+    if (!infile){
         cerr << "Could not open dictionary file: " << file_name << endl;
+        return;
+    }
 
     string word;
     while (infile >> word){
         transform(word.begin(), word.end(), word.begin(), ::tolower);
+        word_list.insert(word);
     }
     infile.close();
 }
@@ -110,7 +112,7 @@ void print_word_ladder(const vector<string>& ladder){
         for (size_t i = 0; i < ladder.size(); i++){
             cout << ladder[i];
             if (i < ladder.size() - 1)
-                cout << " -> ";
+                cout << " ";
         }
         cout << endl;
     }
