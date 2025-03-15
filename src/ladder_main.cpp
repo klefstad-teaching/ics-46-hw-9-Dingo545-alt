@@ -2,6 +2,7 @@
 #include <algorithm> 
 
 int main(){
+    /*
     string start_word, end_word;
     cout << "Enter start word: ";
     cin >> start_word;
@@ -26,7 +27,7 @@ int main(){
     print_word_ladder(ladder);
 
     return 0;
-    
+    */
 
-    //verify_word_ladder();
+    verify_word_ladder();
 }

@@ -62,34 +62,80 @@ bool is_adjacent(const string& word1, const string& word2){
 // --------------------------------------------------------------------------
 // Uses bfs to generate a minimun-length word ladder
 // --------------------------------------------------------------------------
+vector<string> get_neighbors(const string& word, const set<string>& word_list) {
+    vector<string> neighbors;
+
+    // Substitution of one letter
+    for (int i = 0; i < (int)word.size(); i++) {
+        char original = word[i];
+        for (char c = 'a'; c <= 'z'; c++) {
+            if (c == original) continue;
+            string new_word = word;
+            new_word[i] = c;
+            if (word_list.count(new_word)) 
+                neighbors.push_back(new_word);
+        }
+    }
+
+    // Insertion of one letter
+    for (int i = 0; i <= (int)word.size(); i++) {
+        for (char c = 'a'; c <= 'z'; c++) {
+            string new_word = word.substr(0, i) + c + word.substr(i);
+            if (word_list.count(new_word)) 
+                neighbors.push_back(new_word);
+        }
+    }
+
+    // Deletion of one letter
+    if (!word.empty()) {
+        for (int i = 0; i < (int)word.size(); i++) {
+            string new_word = word.substr(0, i) + word.substr(i + 1);
+            if (word_list.count(new_word)) 
+                neighbors.push_back(new_word);
+        }
+    }
+
+    return neighbors;
+}
+
 vector<string> generate_word_ladder(const string& begin_word, const string& end_word, const set<string>& word_list){
+    if (!word_list.count(end_word)) return{};
+    
     queue<vector<string>> ladder_queue;
     set<string> visited;
 
-    vector<string> start;
-    start.push_back(begin_word);
-    ladder_queue.push(start);
+    ladder_queue.push({ begin_word });
     visited.insert(begin_word);
 
-    while(!ladder_queue.empty()){
-        vector<string> ladder = ladder_queue.front();
+    while (!ladder_queue.empty()) {
+        vector<string> path = ladder_queue.front();
         ladder_queue.pop();
-        string last_word = ladder.back();
+        
+        // last word in the current path
+        const string& last_word = path.back();
 
-        for (const string & word : word_list){
-            if(abs((int)word.size() - (int) last_word.size()) > 1)
-                continue;
-            if(visited.find(word) == visited.end() && is_adjacent(last_word, word)){
-                visited.insert(word);
-                vector<string> new_ladder = ladder;
-                new_ladder.push_back(word);
-                if(word == end_word)
-                    return new_ladder;
-                ladder_queue.push(new_ladder);
+        // generate all valid neighbors (words that differ by 1 edit)
+        vector<string> neighbors = get_neighbors(last_word, word_list);
+        for (auto& nbr : neighbors) {
+            if (!visited.count(nbr)) {
+                visited.insert(nbr);
+
+                // build the new path
+                vector<string> new_path = path;
+                new_path.push_back(nbr);
+
+                // reached the end word, return immediately (shortest path).
+                if (nbr == end_word) {
+                    return new_path;
+                }
+                // enqueue and continue
+                ladder_queue.push(new_path);
             }
         }
     }
-    return vector<string> ();
+
+    // exhaust BFS without finding end_word, then no ladder exists
+    return {};
 }
 
 void load_words(set<string> & word_list, const string& file_name){
