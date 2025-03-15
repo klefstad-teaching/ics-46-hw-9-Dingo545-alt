@@ -26,4 +26,7 @@ int main(){
     print_word_ladder(ladder);
 
     return 0;
+    
+
+    //verify_word_ladder();
 }
