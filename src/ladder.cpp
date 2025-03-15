@@ -94,7 +94,8 @@ vector<string> get_neighbors(const string& word, const set<string>& word_list) {
                 neighbors.push_back(new_word);
         }
     }
-
+    
+    std::sort(neighbors.begin(), neighbors.end());
     return neighbors;
 }
 
@@ -135,6 +136,7 @@ vector<string> generate_word_ladder(const string& begin_word, const string& end_
     }
 
     // exhaust BFS without finding end_word, then no ladder exists
+    
     return {};
 }
 
